@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volley Clash 3D — Arcade Volleyball</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% -20%, rgba(255, 138, 42, 0.35) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 50% at 100% 50%, rgba(30, 64, 175, 0.2) 0%, transparent 45%),
+                linear-gradient(165deg, #0f172a 0%, #1e293b 35%, #0c1222 100%);
+            color: #e2e8f0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .grid-floor {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            transform: perspective(400px) rotateX(60deg) scale(2.2);
+            transform-origin: center bottom;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb {
+            position: fixed;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(251, 146, 60, 0.25) 0%, transparent 70%);
+            top: 15%;
+            left: -5%;
+            animation: drift 14s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb:nth-child(2) {
+            left: auto;
+            right: -8%;
+            top: 40%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+            animation-delay: -5s;
+            animation-duration: 18s;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -20px); }
+        }
+
+        .container {
+            max-width: 640px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            border: 1px solid rgba(251, 146, 60, 0.35);
+            border-radius: 24px;
+            padding: 44px 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+                0 32px 64px rgba(0, 0, 0, 0.45),
+                0 0 80px rgba(251, 146, 60, 0.08);
+        }
+
+        .icon-wrap {
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+            box-shadow: 0 12px 32px rgba(234, 88, 12, 0.45);
+        }
+
+        .icon-wrap svg {
+            width: 72px;
+            height: 72px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        h1 {
+            font-size: 2.15rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        h1 span.accent {
+            background: linear-gradient(90deg, #fb923c, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 28px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .chip {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+        }
+
+        .chip.orange {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fdba74;
+            border-color: rgba(251, 146, 60, 0.35);
+        }
+
+        .lead {
+            text-align: left;
+            color: #cbd5e1;
+            line-height: 1.75;
+            font-size: 1.05rem;
+            margin-bottom: 28px;
+        }
+
+        .lead strong {
+            color: #fff;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            text-align: left;
+            margin-bottom: 28px;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 14px;
+            padding: 16px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(251, 146, 60, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .feature-card h3 {
+            font-size: 0.85rem;
+            color: #fb923c;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            font-size: 0.88rem;
+            color: #94a3b8;
+            line-height: 1.55;
+        }
+
+        .cta {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 16px 36px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fbbf24 0%, #f97316 100%);
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(249, 115, 22, 0.5);
+        }
+
+        .foot {
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .foot a {
+            color: #fb923c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .foot a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 560px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 32px 22px;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-floor" aria-hidden="true"></div>
+    <div class="glow-orb" aria-hidden="true"></div>
+    <div class="glow-orb" aria-hidden="true"></div>
+
+    <div class="container">
+        <div class="icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="28" fill="#fff8f0"/>
+                <path d="M32 6 C32 6 58 20 58 32 C58 44 32 58 32 58 C32 58 6 44 6 32 C6 20 32 6 32 6Z" fill="none" stroke="#ea580c" stroke-width="2.5" opacity="0.85"/>
+                <path d="M32 6 C32 6 32 58 32 58" stroke="#ea580c" stroke-width="2" opacity="0.6"/>
+                <path d="M6 32 C6 32 58 32 58 32" stroke="#ea580c" stroke-width="2" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <h1>Volley Clash <span class="accent">3D</span></h1>
+        <p class="tagline">Arcade volley with power shots</p>
+
+        <div class="chips">
+            <span class="chip orange">Free</span>
+            <span class="chip">iOS 15+</span>
+            <span class="chip orange">5-rally matches</span>
+            <span class="chip">Ages 4+</span>
+        </div>
+
+        <p class="lead">
+            <strong>Fast arcade volleyball</strong> built around timing, precision, and unpredictable rallies. Jump, spike, and aim across dynamic courts where every ball drop matters. Each match runs up to five rallies — the first side to let the ball drop three times loses. Curve spikes, a Super Meter, skill zones, court hazards, and rival AI personalities keep every round feeling fresh.
+        </p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Super Spike Meter</h3>
+                <p>Build power by returning the ball and landing strong plays. When the meter is full, unleash a Super Spike with extra speed and impact.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Perfect Curve Spike</h3>
+                <p>Time your jump and swipe to curve the ball toward the opponent’s side. Better timing means stronger shots and longer rallies.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Skill Shot Zones</h3>
+                <p>Special zones appear on the rival court. Nail them with a spike to apply pressure and stronger drop penalties.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Court &amp; Rivals</h3>
+                <p>Desert and water modes shift how the ball moves. AI types like POWER, DEFENDER, TRICK, and CLUTCH change how opponents react.</p>
+            </div>
+        </div>
+
+        <a href="https://apps.apple.com/us/app/volley-clash-3d/id6767529709?uo=4" class="cta" target="_blank" rel="noopener noreferrer">Download on the App Store</a>
+
+        <div class="foot">
+            <a href="privacy.html">Privacy Policy</a>
+        </div>
+    </div>
+</body>
+
+</html>
